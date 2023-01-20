@@ -21,8 +21,8 @@ public class HiloControlador implements Runnable {
 
     @Override
     public void run() {
-        byte[] paqueteRecibido = datagramPacket.getData();
-        String mensajeRecibido = new String(paqueteRecibido, 0, datagramPacket.getLength(), StandardCharsets.UTF_8);
+
+        String mensajeRecibido = new String(datagramPacket.getData(), 0, datagramPacket.getLength(), StandardCharsets.UTF_8);
         String[] ordenYPuerto = mensajeRecibido.split(" ");
 
         if (ordenYPuerto[0].equals("ACTIVAR")) {
