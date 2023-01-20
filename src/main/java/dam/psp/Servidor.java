@@ -17,22 +17,44 @@ Es posible que el servidor tenga el servicio TCP funcionando a la vez en varios 
 tod0 depende de lo que le ordene hacer el cliente controlador.
  */
 /*
-Explicaciones pertinentes:
-- El servidor está tan tranquilo y le viene un cliente y le dice: oye, ponte a escuchar en X puerto. O en su defecto;
-deja de escuchar en X puerto. Tod0 esto por UDP.
-A su vez, viene un pavo que sabe en qué puerto está el tío escuchando y le dice: sosio, arme un fabor y ponte argo wapo.
-mira eto ermano, buena mielda. Obviamente aquí ya hablamos de TCP. Lo de que hay que lanzar los procesos con el ProccessBuilder
-no te creas que me ha quedado muy claro y menos aún lo que deWulve al servidor. La verdad es que ahora mismo no tengo muy
-claro el protocolo, voy a picar un poco de código a ver si así me se asientan las ideas.
+Borrador:
+
  */
 
+/*
+Explicaciones pertinentes:
+
+
+ */
+
+import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.ServerSocket;
 import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Servidor {
+    private static ExecutorService pool= Executors.newFixedThreadPool(10);
+    private static List<ServerSocket> serverSocketList= new ArrayList<>();
     public static void main(String[] args) throws SocketException {
 
-        DatagramSocket datagramSocket=new DatagramSocket(7000);
+        DatagramSocket datagramSocket = new DatagramSocket(7000);
+        while (true) {
+            byte[] buffer = new byte[1024];
+            DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
+            try {
+                datagramSocket.receive(datagramPacket);
+                pool.submit(new HiloControlador(serverSocketList, datagramPacket, pool));
+            } catch (IOException e) {
+                System.err.println("Error al recibir el datagramPacket" + e.getMessage());
+            }
 
+
+
+        }
     }
 }

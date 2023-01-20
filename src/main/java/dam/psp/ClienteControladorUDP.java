@@ -15,12 +15,12 @@ public class ClienteControladorUDP {
 
     public ClienteControladorUDP() throws IOException {
         datagramSocket = new DatagramSocket();
-        pedirOpciones();
+
     }
 
     public static void main(String[] args) throws IOException {
         ClienteControladorUDP clienteControladorUDP = new ClienteControladorUDP();
-
+        clienteControladorUDP.pedirOpciones();
     }
 
 
@@ -43,8 +43,6 @@ public class ClienteControladorUDP {
             datagramPacket = new DatagramPacket(buffer, buffer.length, socketAddress);
 
             datagramSocket.send(datagramPacket);
-
-
         }
     }
 }
