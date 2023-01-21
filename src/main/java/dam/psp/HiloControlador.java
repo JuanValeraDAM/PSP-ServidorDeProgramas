@@ -8,15 +8,17 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 
+/*
+ */
 public class HiloControlador implements Runnable {
     private final List<ServerSocket> serverSocketList;
     private final DatagramPacket datagramPacket;
-    private final ExecutorService pool;
+    private boolean estabaAbierto=false;
 
-    public HiloControlador(List<ServerSocket> serverSocketList, DatagramPacket datagramPacket, ExecutorService pool) {
+
+    public HiloControlador(List<ServerSocket> serverSocketList, DatagramPacket datagramPacket) {
         this.serverSocketList = serverSocketList;
         this.datagramPacket = datagramPacket;
-        this.pool = pool;
     }
 
     @Override
@@ -25,31 +27,38 @@ public class HiloControlador implements Runnable {
         String mensajeRecibido = new String(datagramPacket.getData(), 0, datagramPacket.getLength(), StandardCharsets.UTF_8);
         String[] ordenYPuerto = mensajeRecibido.split(" ");
 
-        if (ordenYPuerto[0].equals("ACTIVAR")) {
-            try {
-                System.out.println("Soy el hilo controlador y voy a escuchar en el puerto: " + ordenYPuerto[1]);
-                ServerSocket serverSocket = new ServerSocket(Integer.parseInt(ordenYPuerto[1]));
-                Socket socketConectado = serverSocket.accept();
-                pool.submit(new HiloSolicitador(socketConectado));
-                System.out.println("Conexión establecida con el puerto: " + ordenYPuerto[1]);
-                serverSocketList.add(serverSocket);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            System.out.println("Soy el hilo controlador y estoy en la parte de desactivar");
+        if (ordenYPuerto[0].equals("DESACTIVAR")) {
             for (ServerSocket serverSocket :
                     serverSocketList) {
                 if (serverSocket.getLocalPort() == Integer.parseInt(ordenYPuerto[1])) {
                     try {
+                        estabaAbierto=true;
                         serverSocket.close();
                         System.out.println("Conexión cerrada con el puerto: " + ordenYPuerto[1]);
                     } catch (IOException e) {
-                        throw new RuntimeException(e);
+                        System.err.println("Soy el hilo controlador y ha habido un error en la parte de cerrar la conexión "+e.getMessage());
                     }
                 }
             }
-            System.out.println("Soy el hilo controlador, he salido del for sin encontrar el puerto que cerrar");
+            if(!estabaAbierto){
+                System.out.println("No se puede cerrar porque no estaba abierto");
+            }
+        } else {
+            try {
+                System.out.println("Abierto el puerto: " + ordenYPuerto[1]);
+                ServerSocket serverSocket = new ServerSocket(Integer.parseInt(ordenYPuerto[1]));
+                serverSocketList.add(serverSocket);
+                while (true) {
+                    Socket socketConectado = serverSocket.accept();
+                    HiloSolicitador solicitador = new HiloSolicitador(socketConectado);
+                    Thread hiloSolicitador = new Thread(solicitador);
+                    hiloSolicitador.start();
+                    System.out.println("Conexión establecida con el puerto: " + ordenYPuerto[1]);
+                }
+            } catch (IOException ignored) {
+            }
+
+
         }
     }
 }

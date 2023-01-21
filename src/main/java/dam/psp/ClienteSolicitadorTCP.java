@@ -10,7 +10,7 @@ import java.util.Scanner;
 public class ClienteSolicitadorTCP {
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
         Socket socket;
         Scanner sc = new Scanner(System.in);
         System.out.println("¿En qué puerto deseas conectarte?");
@@ -18,7 +18,10 @@ public class ClienteSolicitadorTCP {
         System.out.println("¿Qué proceso deseas ejecutar?");
         String proceso=sc.next();
 
-        socket=new Socket("localhost", puerto);
+
+        try {
+            socket=new Socket("localhost", puerto);
+
 
         BufferedReader br= new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter pw=new PrintWriter(socket.getOutputStream());
@@ -29,6 +32,8 @@ public class ClienteSolicitadorTCP {
         int codigoDeRetorno = br.read();
         System.out.println(codigoDeRetorno);
         socket.close();
+        } catch (IOException e) {
+            System.out.println("No se puede ejecutar el comando porque el puerto está cerrado");        }
     }
 
 

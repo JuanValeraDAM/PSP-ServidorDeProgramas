@@ -38,7 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Servidor {
-    private static ExecutorService pool= Executors.newFixedThreadPool(10);
+
     private static List<ServerSocket> serverSocketList= new ArrayList<>();
     public static void main(String[] args) throws SocketException {
 
@@ -48,7 +48,9 @@ public class Servidor {
             DatagramPacket datagramPacket = new DatagramPacket(buffer, buffer.length);
             try {
                 datagramSocket.receive(datagramPacket);
-                pool.submit(new HiloControlador(serverSocketList, datagramPacket, pool));
+                HiloControlador hiloControlador =new HiloControlador(serverSocketList,datagramPacket);
+                Thread controlador=new Thread(hiloControlador);
+                controlador.start();
             } catch (IOException e) {
                 System.err.println("Error al recibir el datagramPacket" + e.getMessage());
             }

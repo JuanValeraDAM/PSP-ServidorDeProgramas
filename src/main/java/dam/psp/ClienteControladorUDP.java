@@ -42,6 +42,7 @@ public class ClienteControladorUDP {
             socketAddress = new InetSocketAddress("localhost", 7000);
             datagramPacket = new DatagramPacket(buffer, buffer.length, socketAddress);
 
+
             datagramSocket.send(datagramPacket);
         }
     }
